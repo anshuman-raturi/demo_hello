@@ -6,6 +6,9 @@ import com.cg.films.entity.Film;
 import com.cg.films.repository.FilmRepository;
 import com.cg.films.repository.ActorRepository;
 import com.cg.films.service.FilmService;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,15 +25,17 @@ public class FilmServiceImpl implements FilmService {
         this.actorRepository = actorRepository;
     }
 
-    @Override
     public List<Film> findFilmsByCategory(String category) {
-        return filmRepository.findByCategories_NameIgnoreCase(category);
-    }
+        if (category == null || category.isBlank()) {
+            throw new IllegalArgumentException("Category name cannot be empty");
+        }
 
-    @Override
-    public List<Actor> findActorsByFilmName(String filmName) {
-        // Use @Query method from ActorRepository
-        return actorRepository.findActorsByFilmName(filmName);
+        List<Film> films = filmRepository.findByCategories_NameIgnoreCase(category);
+        if (films.isEmpty()) {
+            throw new EntityNotFoundException("No films found for category: " + category);
+        }
+
+        return films;
     }
     
     
@@ -57,5 +62,11 @@ public class FilmServiceImpl implements FilmService {
         return filmRepository.findByTitle(title);
     }
     //end
+
+	@Override
+	public List<Actor> findActorsByFilmName(String filmName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }
