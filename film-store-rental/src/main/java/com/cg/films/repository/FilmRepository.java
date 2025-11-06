@@ -7,11 +7,8 @@ import java.util.List;
 
 public interface FilmRepository extends JpaRepository<Film, Long> {
 
-    @Query("SELECT f FROM Film f " +
-           "JOIN FilmCategory fc ON f.filmId = fc.filmId " +
-           "JOIN Category c ON fc.categoryId = c.categoryId " +
-           "WHERE LOWER(c.name) = LOWER(:category)")
-    List<Film> findFilmsByCategory(String category);
+    List<Film> findByCategories_NameIgnoreCase(String name);
+
     
     //lavanya
     List<Film> findByLanguage_Name(String name);
