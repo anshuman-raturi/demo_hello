@@ -24,8 +24,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> findFilmsByCategory(String category) {
-        // Use @Query method from FilmRepository
-        return filmRepository.findFilmsByCategory(category);
+        return filmRepository.findByCategories_NameIgnoreCase(category);
     }
 
     @Override
