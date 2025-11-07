@@ -5,6 +5,7 @@ import com.cg.films.entity.Actor;
 import com.cg.films.entity.Film;
 import com.cg.films.service.FilmService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,22 +26,24 @@ public class FilmController {
         return filmService.findFilmsByCategory(category);
     }
 
-    @GetMapping("/{filmName}/actors")
-    public List<Actor> getActorsByFilm(@PathVariable String filmName) {
-        return filmService.findActorsByFilmName(filmName);
+    @GetMapping("/films/{filmName}/actors")
+    public ResponseEntity<List<Actor>> getActorsByFilmName(@PathVariable String filmName) {
+        List<Actor> actors = filmService.findActorsByFilmName(filmName);
+        return ResponseEntity.ok(actors);
     }
     
     //lavanya
-    @GetMapping("/api/films/language/{lang}")
+    @GetMapping("/api/films/filmDetails/language/{lang}")
     public List<FilmDTO> getFilmsByLanguage(@PathVariable String lang) {
         return filmService.getAllFilmsByLanguage(lang);
     }
+    @GetMapping("/api/films/language/{lang}")
+    public List<FilmDTO> getFilmsByLang(@PathVariable String lang){
+    	return filmService.getAllFilmsByLanguage(lang);
+    }
     //end
     
-    
-    
     //anshuman
-    // Existing endpoint: Get all film details
     @GetMapping
     public ResponseEntity<List<Film>> getAllFilms() {
         return ResponseEntity.ok(filmService.getAllFilms());
