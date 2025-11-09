@@ -4,6 +4,7 @@ import com.cg.films.entity.Actor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
+import java.util.Optional;
 
 public interface ActorRepository extends JpaRepository<Actor, Long> {
 
@@ -13,6 +14,5 @@ public interface ActorRepository extends JpaRepository<Actor, Long> {
            "WHERE LOWER(f.title) = LOWER(:filmName)")
     List<Actor> findActorsByFilmName(String filmName);
     
-    List<Actor> findByFirstNameIgnoreCase(String firstName);
-    List<Actor> findByLastNameIgnoreCase(String lastName);
+    Optional<Actor> findByFirstNameIgnoreCaseAndLastNameIgnoreCase(String firstName, String lastName);
 }

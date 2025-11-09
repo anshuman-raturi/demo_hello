@@ -8,4 +8,5 @@ import com.cg.films.entity.Language;
 
 public interface LanguageRepository extends JpaRepository<Language, Long> {
 	List<Language> findAll();	
+	boolean existsByName(String name);
 }

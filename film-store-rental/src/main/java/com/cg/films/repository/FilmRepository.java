@@ -8,8 +8,7 @@ import java.util.List;
 public interface FilmRepository extends JpaRepository<Film, Long> {
 
     List<Film> findByCategories_NameIgnoreCase(String name);
-
-    
+    Film findByTitleIgnoreCase(String title);
     //lavanya
     List<Film> findByLanguage_Name(String name);
     
