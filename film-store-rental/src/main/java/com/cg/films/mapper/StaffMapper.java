@@ -9,14 +9,12 @@ public class StaffMapper {
  
     public static StaffBasicDTO toBasicDTO(Staff staff) {
         if (staff == null) return null;
- 
         Long addressId = staff.getAddress() != null ? staff.getAddress().getAddressId() : null;
         return new StaffBasicDTO(staff.getFirstName(), staff.getLastName(), addressId);
     }
  
     public static AddressDTO toAddressDTO(Address address) {
         if (address == null) return null;
- 
         AddressDTO dto = new AddressDTO();
         dto.setAddressId(address.getAddressId());
         dto.setAddress(address.getAddress());
