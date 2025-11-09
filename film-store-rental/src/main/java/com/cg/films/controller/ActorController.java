@@ -1,0 +1,43 @@
+package com.cg.films.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cg.films.dto.ActorDTO;
+import com.cg.films.repository.ActorRepository;
+import com.cg.films.service.ActorService;
+
+@RestController
+@RequestMapping("/actors")
+@CrossOrigin("*")
+
+public class ActorController {
+    @Autowired
+    private ActorRepository actorRepository;
+
+    @Autowired
+    private ActorService actorService;
+    @GetMapping
+    public List<ActorDTO> getAllActors() {
+        return actorService.getAllActors();
+    }
+    
+    //neelima
+    @GetMapping("/{id}/films")
+    public List<String> getFilmsByActor(@PathVariable Long id) {
+        return actorService.getFilmsByActor(id);
+    }
+ 
+    @GetMapping("/films/by-name")
+    public List<String> getFilmsByActorFullName(@RequestParam String name) {
+        return actorService.getFilmsByActorFullName(name);
+    }
+    //end
+}
