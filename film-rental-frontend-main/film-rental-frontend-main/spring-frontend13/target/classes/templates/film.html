@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Film Details</title>
+    <script th:inline="javascript">
+    const apiBaseUrl = /*[[${@environment.getProperty('app.backend.url')}]]*/ 'http://localhost:8282';
+        let films = [];
+        let filteredFilms = [];
+        let currentPage = 1;
+        const pageSize = 20;
+ 
+        async function loadFilms() {
+            try {
+            	
+                const response = await fetch(`${apiBaseUrl}/api/films`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                films = await response.json();
+                filteredFilms = films;
+                renderPage(currentPage);
+                renderPagination();
+            } catch (error) {
+                console.error('Error loading films:', error);
+                document.getElementById('filmTableBody').innerHTML = `<tr><td colspan="7" class="error-message">Failed to load data</td></tr>`;
+            }
+        }
+ 
+        function searchFilms() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                filteredFilms = films;
+            } else {
+                filteredFilms = films.filter(film =>
+                    film.title.toLowerCase().includes(searchTerm) ||
+                    (film.description && film.description.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            currentPage = 1;
+            renderPage(currentPage);
+            renderPagination();
+        }
+ 
+        function renderPage(page) {
+            const tableBody = document.getElementById('filmTableBody');
+            tableBody.innerHTML = '';
+            
+            if (filteredFilms.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" class="not-found-message">🎬 Film not found</td></tr>`;
+                return;
+            }
+            
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const pageFilms = filteredFilms.slice(start, end);
+ 
+            pageFilms.forEach((film, index) => {
+                const row = document.createElement('tr');
+                row.style.animationDelay = `${index * 0.05}s`;
+                row.innerHTML = `
+                    <td><span class="id-badge">${film.filmId}</span></td>
+                    <td class="title-cell"><a href="/dvd?title=${encodeURIComponent(film.title)}">${film.title}</a></td>
+                    <td class="description-cell">${film.description || 'N/A'}</td>
+                    <td>${film.releaseYear || 'N/A'}</td>
+                    <td>${film.length || 'N/A'} min</td>
+                    <td><span class="rating-badge">${film.rating || 'NR'}</span></td>
+                    <td><a href="/dvd?title=${encodeURIComponent(film.title)}"><button class="action-btn">Check DVDs</button></a></td>
+                `;
+                tableBody.appendChild(row);
+            });
+            renderPagination();
+        }
+ 
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredFilms.length / pageSize);
+            const paginationDiv = document.getElementById('pagination');
+            
+            if (filteredFilms.length === 0) {
+                paginationDiv.innerHTML = '';
+                return;
+            }
+            
+            paginationDiv.innerHTML = `
+                <button class="page-btn" onclick="prevPage()" ${currentPage === 1 ? 'disabled' : ''}>
+                    <span>← Previous</span>
+                </button>
+                <span class="page-info">Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong></span>
+                <button class="page-btn" onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <span>Next →</span>
+                </button>
+            `;
+        }
+ 
+        function nextPage() {
+            const totalPages = Math.ceil(filteredFilms.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPage(currentPage);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+ 
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage(currentPage);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+ 
+        window.onload = loadFilms;
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+ 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+ 
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+ 
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+ 
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+ 
+        h1 {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+ 
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin-top: 10px;
+        }
+ 
+        .content {
+            padding: 40px;
+        }
+ 
+        .search-container {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+ 
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            max-width: 600px;
+        }
+ 
+        #searchInput {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+ 
+        #searchInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+ 
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #667eea;
+        }
+ 
+        .search-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+ 
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+ 
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+ 
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+        }
+ 
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 13px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+ 
+        td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+ 
+        tbody tr {
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out backwards;
+        }
+ 
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+ 
+        tbody tr:hover {
+            background: linear-gradient(to right, #f8f9ff, #fff);
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+ 
+        .title-cell a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+ 
+        .title-cell a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+ 
+        .description-cell {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #666;
+        }
+ 
+        .id-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+ 
+        .rating-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+ 
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+ 
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+ 
+        #pagination {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: linear-gradient(to right, #f8f9ff, #fff);
+            border-radius: 12px;
+        }
+ 
+        .page-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+ 
+        .page-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+ 
+        .page-btn:disabled {
+            background: linear-gradient(135deg, #ccc 0%, #999 100%);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+ 
+        .page-info {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+ 
+        .page-info strong {
+            color: #667eea;
+            font-size: 18px;
+        }
+ 
+        .error-message {
+            color: #e74c3c;
+            font-weight: 600;
+            text-align: center;
+            padding: 40px;
+            background: #fee;
+            border-radius: 8px;
+        }
+ 
+        .not-found-message {
+            color: #667eea;
+            font-weight: 600;
+            text-align: center;
+            padding: 60px;
+            background: linear-gradient(to right, #f8f9ff, #fff);
+            border-radius: 8px;
+            font-size: 18px;
+        }
+ 
+        @media (max-width: 1200px) {
+            .description-cell {
+                max-width: 200px;
+            }
+        }
+ 
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 15px;
+            }
+ 
+            h1 {
+                font-size: 2em;
+            }
+ 
+            .content {
+                padding: 20px;
+            }
+ 
+            .search-container {
+                flex-direction: column;
+            }
+ 
+            .search-wrapper {
+                max-width: 100%;
+            }
+ 
+            .search-btn {
+                width: 100%;
+            }
+ 
+            table {
+                font-size: 12px;
+            }
+ 
+            th, td {
+                padding: 10px 8px;
+            }
+ 
+            .description-cell {
+                max-width: 150px;
+            }
+ 
+            #pagination {
+                flex-direction: column;
+                gap: 15px;
+            }
+ 
+            .page-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Film Collection</h1>
+            <p class="subtitle">Browse our complete film catalog</p>
+        </div>
+        
+        <div class="content">
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search films by title or description..."
+                        onkeyup="if(event.key === 'Enter') searchFilms()"
+                    >
+                    <span class="search-icon">🔍</span>
+                </div>
+                <button class="search-btn" onclick="searchFilms()">Search</button>
+            </div>
+ 
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Year</th>
+                            <th>Length</th>
+                            <th>Rating</th>
+                            <th>DVD Info</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filmTableBody">
+                        <tr><td colspan="7" style="text-align: center; padding: 60px; color: #999;">Loading films...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="pagination"></div>
+        </div>
+    </div>
+</body>
+</html>

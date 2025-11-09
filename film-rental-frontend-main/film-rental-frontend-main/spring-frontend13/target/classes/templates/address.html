@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Staff Address</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            color: #1e293b;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin-top: 2rem;
+            margin-bottom: 3rem;
+            padding: 0;
+        }
+
+        .header-section {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            margin-top: 2rem;
+            border-left: 6px solid #667eea;
+            animation: fadeInDown 0.8s ease;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .header-section:hover {
+            transform: translateY(-4px);
+        }
+
+        .header-section h2 {
+            color: #1e293b;
+            font-weight: 800;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .header-section h2 i {
+            color: #667eea;
+            font-size: 2rem;
+            animation: slideInLeft 0.6s ease;
+        }
+
+        .table-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease 0.2s both;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .table-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .table-card table {
+            margin: 0;
+            border-collapse: collapse;
+        }
+
+        .table-card thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .table-card thead th {
+            color: white;
+            font-weight: 700;
+            padding: 1.5rem 2rem;
+            border: none;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-card thead th i {
+            font-size: 1.1rem;
+        }
+
+        .table-card tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .table-card tbody tr:nth-child(1) { animation-delay: 0.3s; }
+        .table-card tbody tr:nth-child(2) { animation-delay: 0.4s; }
+        .table-card tbody tr:nth-child(3) { animation-delay: 0.5s; }
+        .table-card tbody tr:nth-child(4) { animation-delay: 0.6s; }
+
+        .table-card tbody tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .table-card tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .table-card tbody td {
+            padding: 1.5rem 2rem;
+            color: #64748b;
+            vertical-align: middle;
+            font-weight: 500;
+        }
+
+        .table-card tbody td i {
+            color: #667eea;
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .table-card tbody td.label-cell {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f0f1fa 100%);
+            font-weight: 700;
+            color: #1e293b;
+            min-width: 150px;
+            border-right: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-card tbody td.value-cell {
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 1.05rem;
+            letter-spacing: 0.2px;
+        }
+
+        .action-section {
+            display: flex;
+            gap: 14px;
+            justify-content: flex-start;
+            animation: fadeIn 0.8s ease 0.4s both;
+            flex-wrap: wrap;
+            padding: 0 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-custom {
+            padding: 12px 28px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+            border-radius: 25px;
+        }
+
+        .btn-custom:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+        }
+
+        .btn-secondary-custom:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-3px);
+            color: #ffffff;
+            text-decoration: none;
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary-custom:active {
+            transform: translateY(-1px);
+        }
+
+        .back-button-icon {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-secondary-custom:hover .back-button-icon {
+            transform: translateX(-3px);
+        }
+
+        .detail-badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin-top: 1rem;
+            }
+
+            .header-section {
+                padding: 1.75rem;
+            }
+
+            .header-section h2 {
+                font-size: 1.5rem;
+                gap: 10px;
+            }
+
+            .header-section h2 i {
+                font-size: 1.5rem;
+            }
+
+            .table-card thead th {
+                padding: 1rem 1.25rem;
+                font-size: 0.8rem;
+                letter-spacing: 0.5px;
+            }
+
+            .table-card tbody td {
+                padding: 1rem 1.25rem;
+                font-size: 0.9rem;
+            }
+
+            .table-card tbody td.label-cell {
+                min-width: 120px;
+                font-size: 0.9rem;
+            }
+
+            .table-card tbody td i {
+                margin-right: 6px;
+                font-size: 1rem;
+                width: 18px;
+            }
+
+            .btn-custom {
+                width: 100%;
+                justify-content: center;
+                padding: 11px 20px;
+                font-size: 0.9rem;
+                gap: 8px;
+            }
+
+            .action-section {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header-section {
+                padding: 1.5rem;
+            }
+
+            .header-section h2 {
+                font-size: 1.3rem;
+            }
+
+            .table-card thead th {
+                padding: 0.75rem;
+                font-size: 0.75rem;
+                letter-spacing: 0.3px;
+            }
+
+            .table-card tbody td {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .table-card tbody td.label-cell {
+                min-width: 100px;
+                font-size: 0.8rem;
+            }
+
+            .table-card tbody td i {
+                margin-right: 4px;
+                font-size: 0.9rem;
+            }
+
+            .btn-custom {
+                padding: 10px 16px;
+                font-size: 0.8rem;
+                gap: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header-section">
+        <h2>
+            <i class="fas fa-map-location-dot"></i>
+            <span th:text="'Address Details for ' + ${fullName}">Address Details</span>
+        </h2>
+    </div>
+
+    <div class="table-card">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-tag"></i>Field</th>
+                    <th><i class="fas fa-info-circle"></i>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="label-cell"><i class="fas fa-map-marker-alt"></i>Address</td>
+                    <td class="value-cell" th:text="${address.address}">123 Main Street</td>
+                </tr>
+                <tr>
+                    <td class="label-cell"><i class="fas fa-map-pin"></i>District</td>
+                    <td class="value-cell" th:text="${address.district}">District</td>
+                </tr>
+                <tr>
+                    <td class="label-cell"><i class="fas fa-phone"></i>Phone</td>
+                    <td class="value-cell" th:text="${address.phone}">+91-9876543210</td>
+                </tr>
+                <tr>
+                    <td class="label-cell"><i class="fas fa-clock"></i>Last Updated</td>
+                    <td class="value-cell" th:text="${#dates.format(address.lastUpdate, 'dd MMM yyyy, HH:mm')}">08 Nov 2025, 10:00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="action-section">
+        <a href="/staff" class="btn-custom btn-secondary-custom">
+            <i class="fas fa-arrow-left back-button-icon"></i>
+            Back to Staff List
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

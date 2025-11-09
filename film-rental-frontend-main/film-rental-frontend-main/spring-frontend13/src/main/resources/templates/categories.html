@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Categories</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script th:inline="javascript">
+    const apiBaseUrl = /*[[${@environment.getProperty('app.backend.url')}]]*/ 'http://localhost:8282';
+        let categories = [];
+ 
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/categories`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                categories = await response.json();
+                renderCategories();
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                document.getElementById('categoryTableBody').innerHTML =
+                    `<tr><td colspan="3"><div class="error-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load categories</p></div></td></tr>`;
+            }
+        }
+ 
+        function renderCategories() {
+            const tableBody = document.getElementById('categoryTableBody');
+            tableBody.innerHTML = '';
+            if (categories.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3"><div class="empty-state"><i class="fas fa-film"></i><p>No categories found</p></div></td></tr>`;
+                return;
+            }
+            categories.forEach((category, index) => {
+                const row = document.createElement('tr');
+                row.style.animationDelay = `${index * 0.05}s`;
+                row.innerHTML = `
+                    <td><span class="category-id">#${category.categoryId}</span></td>
+                    <td><span class="category-name">${category.name}</span></td>
+                    <td><a href="/filmsbyCategory?name=${encodeURIComponent(category.name)}" style="text-decoration: none;"><button class="action-btn"><i class="fas fa-eye"></i>View Films</button></a></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        window.onload = loadCategories;
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 45px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.8rem;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .table-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            animation: fadeInUp 0.7s ease-out;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .card-header h2 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .card-header i {
+            font-size: 1.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+        }
+
+        th {
+            padding: 18px 20px;
+            text-align: center;
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+
+        tbody td {
+            padding: 18px 20px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+            animation: slideIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+
+        tbody tr:hover {
+            background-color: #f7fafc;
+            box-shadow: inset 0 0 10px rgba(102, 126, 234, 0.05);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .category-id {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .category-name {
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 1.05rem;
+            letter-spacing: 0.3px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .action-btn i {
+            font-size: 1rem;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #cbd5e0;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #718096;
+        }
+
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #f56565;
+        }
+
+        .error-state i {
+            font-size: 4rem;
+            color: #fc8181;
+            margin-bottom: 15px;
+        }
+
+        .error-state p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #c53030;
+        }
+
+        .error-message {
+            padding: 60px 20px !important;
+            text-align: center;
+            color: #f56565;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .card-header {
+                padding: 20px;
+            }
+
+            .card-header h2 {
+                font-size: 1.3rem;
+            }
+
+            th {
+                font-size: 0.85rem;
+                padding: 12px 10px;
+            }
+
+            tbody td {
+                font-size: 0.9rem;
+                padding: 12px 10px;
+            }
+
+            .action-btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
+
+            .category-name {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="table-container">
+    <div class="header-section">
+        <h1>
+            <i class="fas fa-film"></i>
+            Movie Categories
+        </h1>
+        <p class="header-subtitle">Browse and explore all available film categories</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>
+                <i class="fas fa-list"></i>
+                Category Directory
+            </h2>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag" style="margin-right: 6px;"></i>ID</th>
+                    <th><i class="fas fa-tag" style="margin-right: 6px;"></i>Category Name</th>
+                    <th><i class="fas fa-cogs" style="margin-right: 6px;"></i>Action</th>
+                </tr>
+            </thead>
+            <tbody id="categoryTableBody">
+                <tr><td colspan="3"><div class="empty-state"><i class="fas fa-spinner"></i><p>Loading categories...</p></div></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Movie Categories System. All rights reserved.</p>
+</footer>
+</body>
+</html>

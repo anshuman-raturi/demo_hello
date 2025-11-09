@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DVD Count</title>
+    <script th:inline="javascript">
+    const apiBaseUrl = /*[[${@environment.getProperty('app.backend.url')}]]*/ 'http://localhost:8282';
+        async function getDvdCount(titleFromUrl) {
+            const title = titleFromUrl || document.getElementById('filmTitle').value;
+            const tableBody = document.getElementById('dvdTableBody');
+ 
+            if (!title) {
+                tableBody.innerHTML = `<tr><td colspan="2" class="error-message">Please enter a film title.</td></tr>`;
+                return;
+            }
+ 
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/inventory/count?title=${encodeURIComponent(title)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    tableBody.innerHTML = `
+                        <tr class="fade-in">
+                            <td>${data.title}</td>
+                            <td><span class="badge">${data.dvdCount}</span></td>
+                        </tr>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    tableBody.innerHTML = `<tr><td colspan="2" class="error-message">${errorText}</td></tr>`;
+                }
+            } catch (error) {
+                tableBody.innerHTML = `<tr><td colspan="2" class="error-message">Error fetching data.</td></tr>`;
+                console.error(error);
+            }
+        }
+ 
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const title = urlParams.get('title');
+            if (title) {
+                document.getElementById('filmTitle').value = title;
+                getDvdCount(title);
+            }
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+ 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+ 
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+ 
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+ 
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+ 
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+ 
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+ 
+        .content {
+            padding: 40px;
+        }
+ 
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+ 
+        input[type="text"] {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+ 
+        input[type="text"]:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+ 
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+ 
+        .search-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+ 
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+ 
+        .search-button:active {
+            transform: translateY(0);
+        }
+ 
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+ 
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+ 
+        td {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 16px;
+        }
+ 
+        tr:last-child td {
+            border-bottom: none;
+        }
+ 
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+ 
+        tbody tr:hover {
+            background-color: #f8f9ff;
+            transform: scale(1.01);
+        }
+ 
+        .badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 10px rgba(17, 153, 142, 0.3);
+        }
+ 
+        .error-message {
+            color: #e74c3c;
+            font-weight: 600;
+            text-align: center;
+            padding: 30px;
+            background: #fee;
+            border-radius: 8px;
+        }
+ 
+        .back-button {
+            margin-top: 40px;
+            text-align: center;
+        }
+ 
+        .back-button a {
+            text-decoration: none;
+        }
+ 
+        .back-button button {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 15px 40px;
+        }
+ 
+        .back-button button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+ 
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+ 
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+ 
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                border-radius: 15px;
+            }
+ 
+            h1 {
+                font-size: 2em;
+            }
+ 
+            .content {
+                padding: 25px;
+            }
+ 
+            .search-box {
+                flex-direction: column;
+            }
+ 
+            input[type="text"] {
+                width: 100%;
+            }
+ 
+            table {
+                font-size: 14px;
+            }
+ 
+            th, td {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 DVD Inventory</h1>
+            <p class="subtitle">Check available DVD copies for any film</p>
+        </div>
+        
+        <div class="content">
+            <div class="search-box">
+                <input type="text" id="filmTitle" placeholder="Enter film title..." />
+                <button class="search-button" onclick="getDvdCount()">Search</button>
+            </div>
+     
+            <table>
+                <thead>
+                    <tr>
+                        <th>Film Title</th>
+                        <th>Number of DVDs</th>
+                    </tr>
+                </thead>
+                <tbody id="dvdTableBody">
+                    <tr><td colspan="2" style="text-align: center; color: #999; padding: 40px;">Enter a film title to check DVD availability</td></tr>
+                </tbody>
+            </table>
+     
+            <div class="back-button">
+                <a href="/films"><button>← Back to Film List</button></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

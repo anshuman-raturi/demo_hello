@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Film Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Poppins', sans-serif;
+            color: #212529;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin-top: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-size: 2.8rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.8s ease;
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+        }
+
+        .card h2 {
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .alert {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+            border: 2px solid #fca5a5;
+            color: #991b1b;
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.5s ease;
+        }
+
+        .alert i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        table {
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+
+        thead.table-dark {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        thead th {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        thead th i {
+            margin-right: 8px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        tbody tr:nth-child(1) { animation-delay: 0.1s; }
+        tbody tr:nth-child(2) { animation-delay: 0.2s; }
+        tbody tr:nth-child(3) { animation-delay: 0.3s; }
+        tbody tr:nth-child(4) { animation-delay: 0.4s; }
+        tbody tr:nth-child(5) { animation-delay: 0.5s; }
+        tbody tr:nth-child(6) { animation-delay: 0.6s; }
+        tbody tr:nth-child(7) { animation-delay: 0.7s; }
+        tbody tr:nth-child(8) { animation-delay: 0.8s; }
+        tbody tr:nth-child(9) { animation-delay: 0.9s; }
+        tbody tr:nth-child(10) { animation-delay: 1s; }
+
+        tbody td {
+            padding: 1.5rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 500;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .film-title {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .film-description {
+            color: #4a5568;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .film-year {
+            color: #667eea;
+            font-weight: 700;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.95rem;
+        }
+
+        .no-data {
+            color: #718096;
+            font-weight: 500;
+            text-align: center;
+            padding: 3rem 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .no-data i {
+            font-size: 2.5rem;
+            color: #cbd5e0;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        /* Pagination Styles */
+        .pagination-wrapper {
+            padding: 2rem;
+            text-align: center;
+            animation: slideUp 0.5s ease;
+        }
+
+        .pagination-info {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-pagination {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 11px 24px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-pagination::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+            border-radius: 25px;
+        }
+
+        .btn-pagination:hover::before {
+            left: 100%;
+        }
+
+        .btn-pagination:hover:not(:disabled) {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+            color: white;
+        }
+
+        .btn-pagination:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-pagination:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-pagination:disabled:hover {
+            transform: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .page-number {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 2px solid #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .page-number:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .page-number.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .page-ellipsis {
+            color: #a0aec0;
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 0 4px;
+        }
+
+        .btn-back-wrapper {
+            text-align: center;
+            padding: 1rem 0;
+            animation: fadeIn 0.8s ease 0.4s both;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 28px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-secondary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+            border-radius: 25px;
+        }
+
+        .btn-secondary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+            color: white;
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            thead th {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+
+            tbody td {
+                font-size: 0.9rem;
+                padding: 1rem;
+            }
+
+            .pagination-controls {
+                gap: 8px;
+            }
+
+            .btn-pagination {
+                padding: 9px 18px;
+                font-size: 0.85rem;
+            }
+
+            .page-number {
+                width: 36px;
+                height: 36px;
+                font-size: 0.85rem;
+            }
+
+            .page-numbers {
+                gap: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="card">
+        <h2 class="text-center mb-4">
+            <i class="fas fa-film"></i>
+            <span th:text="'Films for ' + ${language}">Film Details</span>
+        </h2>
+		
+        <div th:if="${error}" class="alert alert-warning text-center">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
+        </div>
+		
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th><i class="fas fa-film"></i>Title</th>
+                </tr>
+            </thead>
+            <tbody id="filmTableBody">
+                <tr th:each="film : ${films}">
+                    <td><span class="film-title" th:text="${film.title}">ACADEMY DINOSAUR</span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(films)}">
+                    <td class="no-data">
+                        <i class="fas fa-inbox"></i>
+                        <div>No films available for this language.</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination-wrapper" id="paginationWrapper" style="display: none;">
+            <div class="pagination-info" id="paginationInfo">Showing 1 - 10 of 50</div>
+            <div class="pagination-controls">
+                <button id="prevBtn" class="btn-pagination" onclick="previousPage()">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <div class="page-numbers" id="pageNumbers"></div>
+                <button id="nextBtn" class="btn-pagination" onclick="nextPage()">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="btn-back-wrapper">
+            <a href="/languages" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Back to Language List
+            </a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Language Portal | Film Management System</p>
+</footer>
+
+<script th:inline="javascript">
+const apiBaseUrl = /*[[${@environment.getProperty('app.backend.url')}]]*/ 'http://localhost:8282';
+document.addEventListener("DOMContentLoaded", function () {
+    const rows = document.querySelectorAll("tbody tr:not(:has(.no-data))");
+    const rowsPerPage = 10;
+    const totalPages = Math.ceil(rows.length / rowsPerPage);
+    let currentPage = 1;
+
+    function showPage(page) {
+        rows.forEach((row, index) => {
+            row.style.display = (index >= (page - 1) * rowsPerPage && index < page * rowsPerPage) ? "" : "none";
+        });
+        
+        // Update pagination info
+        const start = (page - 1) * rowsPerPage + 1;
+        const end = Math.min(page * rowsPerPage, rows.length);
+        document.getElementById('paginationInfo').textContent = 
+            `Showing ${start} - ${end} of ${rows.length}`;
+        
+        // Update button states
+        document.getElementById('prevBtn').disabled = page === 1;
+        document.getElementById('nextBtn').disabled = page === totalPages;
+        
+        renderPageNumbers(page);
+    }
+
+    function renderPageNumbers(currentPageNum) {
+        const pageNumbersContainer = document.getElementById('pageNumbers');
+        pageNumbersContainer.innerHTML = '';
+        
+        const startPage = Math.max(1, currentPageNum - 2);
+        const endPage = Math.min(totalPages, currentPageNum + 2);
+        
+        if (startPage > 1) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = 'page-number';
+            pageBtn.textContent = '1';
+            pageBtn.onclick = () => goToPage(1);
+            pageNumbersContainer.appendChild(pageBtn);
+            
+            if (startPage > 2) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'page-ellipsis';
+                ellipsis.textContent = '...';
+                pageNumbersContainer.appendChild(ellipsis);
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = 'page-number' + (i === currentPageNum ? ' active' : '');
+            pageBtn.textContent = i;
+            pageBtn.onclick = () => goToPage(i);
+            pageNumbersContainer.appendChild(pageBtn);
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'page-ellipsis';
+                ellipsis.textContent = '...';
+                pageNumbersContainer.appendChild(ellipsis);
+            }
+            
+            const pageBtn = document.createElement('button');
+            pageBtn.className = 'page-number';
+            pageBtn.textContent = totalPages;
+            pageBtn.onclick = () => goToPage(totalPages);
+            pageNumbersContainer.appendChild(pageBtn);
+        }
+    }
+
+    function nextPage() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            showPage(currentPage);
+        }
+    }
+
+    function previousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
+        }
+    }
+
+    function goToPage(pageNum) {
+        currentPage = pageNum;
+        showPage(currentPage);
+    }
+
+    // Check if there are any films to display
+    const noDataRow = document.querySelector("tbody tr:has(.no-data)");
+    
+    if (rows.length > 0) {
+        // Films found - show pagination if needed
+        if (rows.length > rowsPerPage) {
+            document.getElementById('paginationWrapper').style.display = 'block';
+        }
+        showPage(currentPage);
+    } else if (noDataRow) {
+        // No films found - show empty state message
+        noDataRow.style.display = '';
+        document.getElementById('paginationWrapper').style.display = 'none';
+    }
+});
+</script>
+</body>
+</html>

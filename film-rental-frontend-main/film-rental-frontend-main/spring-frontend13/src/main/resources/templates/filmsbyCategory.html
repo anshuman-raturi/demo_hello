@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Films by Category</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script th:inline="javascript">
+    const apiBaseUrl = /*[[${@environment.getProperty('app.backend.url')}]]*/ 'http://localhost:8282';
+        let films = [];
+        const pageSize = 10;
+        let currentPage = 1;
+ 
+        async function loadFilms() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cname = urlParams.get('name');
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/films/category/${encodeURIComponent(cname)}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                films = await response.json();
+                currentPage = 1;
+                renderPage(currentPage);
+                renderPagination();
+                updateCategoryTitle(cname);
+            } catch (error) {
+                console.error('Error loading films:', error);
+                document.getElementById('filmTableBody').innerHTML =
+                    `<tr><td colspan="5"><div class="error-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load films</p></div></td></tr>`;
+            }
+        }
+
+        function updateCategoryTitle(categoryName) {
+            document.getElementById('categoryTitle').textContent = categoryName || 'Films';
+        }
+ 
+        function renderPage(page) {
+            const tableBody = document.getElementById('filmTableBody');
+            tableBody.innerHTML = '';
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const pageFilms = films.slice(start, end);
+ 
+            if (pageFilms.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><i class="fas fa-film"></i><p>No films found in this category</p></div></td></tr>`;
+                return;
+            }
+
+            pageFilms.forEach((film, index) => {
+                const row = document.createElement('tr');
+                row.style.animationDelay = `${index * 0.05}s`;
+                row.innerHTML = `
+                    <td><span class="film-id">#${film.filmId}</span></td>
+                    <td><span class="film-title">${film.title}</span></td>
+                    <td><span class="film-description">${film.description || 'N/A'}</span></td>
+                    <td><span class="film-year">${film.releaseYear || 'N/A'}</span></td>
+                    <td><span class="film-rating">${film.rating || 'NR'}</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+ 
+        function renderPagination() {
+            const totalPages = Math.ceil(films.length / pageSize);
+            const paginationDiv = document.getElementById('pagination');
+            
+            let paginationHTML = `
+                <div class="pagination-controls">
+                    <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" onclick="prevPage()" ${currentPage === 1 ? 'disabled' : ''}>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <div class="page-info">
+                        <span class="page-display">Page <span class="current-page">${currentPage}</span> of <span class="total-pages">${totalPages}</span></span>
+                        <span class="films-count">(${films.length} films)</span>
+                    </div>
+                    <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''}>
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            `;
+
+            if (totalPages > 1) {
+                paginationHTML += `<div class="page-numbers">`;
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        paginationHTML += `<button class="page-number active">${i}</button>`;
+                    } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                        paginationHTML += `<button class="page-number" onclick="goToPage(${i})">${i}</button>`;
+                    } else if (i === currentPage - 2 || i === currentPage + 2) {
+                        paginationHTML += `<span class="page-ellipsis">...</span>`;
+                    }
+                }
+                paginationHTML += `</div>`;
+            }
+
+            paginationDiv.innerHTML = paginationHTML;
+        }
+ 
+        function nextPage() {
+            const totalPages = Math.ceil(films.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPage(currentPage);
+                renderPagination();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+ 
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage(currentPage);
+                renderPagination();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderPage(currentPage);
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+ 
+        window.onload = loadFilms;
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 45px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.8rem;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .category-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        #categoryTitle {
+            color: #ffd700;
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        .table-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeInUp 0.7s ease-out;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .card-header h2 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .card-header i {
+            font-size: 1.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+        }
+
+        th {
+            padding: 18px 15px;
+            text-align: center;
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+
+        tbody td {
+            padding: 18px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+            animation: slideIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+
+        tbody tr:hover {
+            background-color: #f7fafc;
+            box-shadow: inset 0 0 10px rgba(102, 126, 234, 0.05);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .film-id {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1rem;
+        }
+
+        .film-title {
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .film-description {
+            color: #4a5568;
+            font-size: 0.95rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .film-year {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .film-rating {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #cbd5e0;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #718096;
+        }
+
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .error-state i {
+            font-size: 4rem;
+            color: #fc8181;
+            margin-bottom: 15px;
+        }
+
+        .error-state p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #c53030;
+        }
+
+        .error-message {
+            padding: 60px 20px !important;
+            text-align: center;
+            color: #f56565;
+            font-weight: 500;
+        }
+
+        /* Pagination Styles */
+        #pagination {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pagination-btn:hover:not(.disabled) {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .pagination-btn:active:not(.disabled) {
+            transform: translateY(0);
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: #f7fafc;
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .page-display {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+
+        .current-page {
+            color: #667eea;
+            font-weight: 800;
+        }
+
+        .total-pages {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .films-count {
+            color: #718096;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .page-numbers {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .page-number {
+            background: #ffffff;
+            color: #667eea;
+            border: 2px solid #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-number:hover {
+            background: #667eea;
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .page-number.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .page-ellipsis {
+            color: #a0aec0;
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 0 4px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .card-header {
+                padding: 20px;
+            }
+
+            .card-header h2 {
+                font-size: 1.3rem;
+            }
+
+            th {
+                font-size: 0.8rem;
+                padding: 12px 8px;
+            }
+
+            tbody td {
+                font-size: 0.9rem;
+                padding: 12px 8px;
+            }
+
+            .film-title {
+                font-size: 0.95rem;
+            }
+
+            .film-description {
+                font-size: 0.85rem;
+            }
+
+            .pagination-controls {
+                gap: 10px;
+            }
+
+            .pagination-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+
+            .page-info {
+                padding: 10px 16px;
+            }
+
+            .page-number {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="table-container">
+    <div class="header-section">
+        <h1>
+            <i class="fas fa-film"></i>
+            Films in Category
+        </h1>
+        <p class="category-label">Viewing: <span id="categoryTitle">Loading...</span></p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>
+                <i class="fas fa-video"></i>
+                Film Catalog
+            </h2>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag" style="margin-right: 6px;"></i>ID</th>
+                    <th><i class="fas fa-book" style="margin-right: 6px;"></i>Title</th>
+                    <th><i class="fas fa-align-left" style="margin-right: 6px;"></i>Description</th>
+                    <th><i class="fas fa-calendar" style="margin-right: 6px;"></i>Release Year</th>
+                    <th><i class="fas fa-star" style="margin-right: 6px;"></i>Rating</th>
+                </tr>
+            </thead>
+            <tbody id="filmTableBody">
+                <tr><td colspan="5"><div class="empty-state"><i class="fas fa-spinner"></i><p>Loading films...</p></div></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="pagination"></div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Film Catalog System. All rights reserved.</p>
+</footer>
+</body>
+</html>

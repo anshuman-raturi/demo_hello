@@ -1,0 +1,349 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Our Film Project Team</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: "Poppins", sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background elements */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -100px;
+            left: -100px;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        body::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            bottom: -50px;
+            right: -50px;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .team-section {
+            margin-top: 60px;
+            margin-bottom: 60px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .page-header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        
+        .page-header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .team-card {
+            border: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 20px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+        
+        .team-card:nth-child(1) { animation-delay: 0.1s; }
+        .team-card:nth-child(2) { animation-delay: 0.2s; }
+        .team-card:nth-child(3) { animation-delay: 0.3s; }
+        .team-card:nth-child(4) { animation-delay: 0.4s; }
+        .team-card:nth-child(5) { animation-delay: 0.5s; }
+        .team-card:nth-child(6) { animation-delay: 0.6s; }
+        .team-card:nth-child(7) { animation-delay: 0.7s; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .team-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .member-photo-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+        }
+        
+        .member-photo {
+            height: 100%;
+            object-fit: cover;
+            width: 100%;
+            transition: transform 0.5s ease;
+        }
+        
+        .team-card:hover .member-photo {
+            transform: scale(1.1);
+        }
+        
+        .photo-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .team-card:hover .photo-overlay {
+            opacity: 1;
+        }
+        
+        .overlay-text {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .member-info {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+        
+        .member-name {
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+            text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-accent {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .page-header p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container team-section">
+    <div class="page-header">
+        <h1>Our Project Team</h1>
+        <p>Meet the creative minds behind our amazing film project</p>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 justify-content-center">
+    
+    
+        <div class="col">
+            <div class="card team-card">
+                <div class="member-photo-wrapper">
+                    <img src="/images/member7.jpg" class="member-photo" alt="Rohit Singh">
+                    <div class="photo-overlay">
+                        <span class="overlay-text">View Profile</span>
+                    </div>
+                </div>
+                <div class="member-info">
+                    <p class="member-name">Mufi</p>
+                    <div class="card-accent"></div>
+                </div>
+                <a href="/categories" class="stretched-link"></a>
+            </div>
+        </div>
+        
+        <!-- Member 1 -->
+        <div class="col">
+            <div class="card team-card">
+                <div class="member-photo-wrapper">
+                    <img src="/images/akshat.jpg" class="member-photo" alt="Akshat Agarwal">
+                    <div class="photo-overlay">
+                        <span class="overlay-text">View Profile</span>
+                    </div>
+                </div>
+                <div class="member-info">
+                    <p class="member-name">Akshat Agarwal</p>
+                    <div class="card-accent"></div>
+                </div>
+                <a href="/customers" class="stretched-link"></a>
+            </div>
+        </div>
+        
+        <!-- Member 2 -->
+        <div class="col">
+            <div class="card team-card">
+                <div class="member-photo-wrapper">
+                    <img src="/images/anshuman.jpeg" class="member-photo" alt="Riya Sharma">
+                    <div class="photo-overlay">
+                        <span class="overlay-text">View Profile</span>
+                    </div>
+                </div>
+                <div class="member-info">
+                    <p class="member-name">Anshuman Raturi</p>
+                    <div class="card-accent"></div>
+                    </div>
+                <a href="/films" class="stretched-link"></a>
+            </div>
+        </div>
+        
+        <!-- Member 3 -->
+        <div class="col">
+            <div class="card team-card">
+                <div class="member-photo-wrapper">
+                    <img src="/images/Neelima.jpg" class="member-photo" alt="Karan Mehta">
+                    <div class="photo-overlay">
+                        <span class="overlay-text">View Profile</span>
+                    </div>
+                </div>
+                <div class="member-info">
+                    <p class="member-name">Neelima</p>
+                    <div class="card-accent"></div>
+                </div>
+                <a href="/actors" class="stretched-link"></a>
+            </div>
+        </div>
+        
+        <!-- Member 4 -->
+        <div class="col">
+            <div class="card team-card">
+                <div class="member-photo-wrapper">
+                    <img src="/images/lavanya.jpg" class="member-photo" alt="Sanya Gupta">
+                    <div class="photo-overlay">
+                        <span class="overlay-text">View Profile</span>
+                    </div>
+                </div>
+                <div class="member-info">
+                    <p class="member-name">lavanya</p>
+                    <div class="card-accent"></div>
+                </div>
+                <a href="/languages" class="stretched-link"></a>
+            </div>
+        </div>
+        
+        <!-- Member 5 -->
+        <div class="col">
+            <div class="card team-card">
+                <div class="member-photo-wrapper">
+                    <img src="/images/Manasa.jpg" class="member-photo" alt="Arjun Patel">
+                    <div class="photo-overlay">
+                        <span class="overlay-text">View Profile</span>
+                    </div>
+                </div>
+                <div class="member-info">
+                    <p class="member-name">Manasa</p>
+                    <div class="card-accent"></div>
+                </div>
+                <a href="/staff" class="stretched-link"></a>
+            </div>
+        </div>
+        
+        <!-- Member 6 -->
+        <div class="col">
+            <div class="card team-card">
+                <div class="member-photo-wrapper">
+                    <img src="/images/navya.jpg" class="member-photo" alt="Neha Verma">
+                    <div class="photo-overlay">
+                        <span class="overlay-text">View Profile</span>
+                    </div>
+                </div>
+                <div class="member-info">
+                    <p class="member-name">Navya</p>
+                    <div class="card-accent"></div>
+                </div>
+                <a href="/store" class="stretched-link"></a>
+            </div>
+        </div>
+        
+        <!-- Member 7 -->
+        
+        
+    </div>
+</div>
+</body>
+</html>
