@@ -14,9 +14,11 @@ public interface FilmService {
     
     //lavanya
 	List<FilmDTO> getAllFilmsByLanguage(String name);
+	List<FilmDTO> getAllFilmTitlesByLanguage(String name);
 
 	
 	//anshuman
     List<Film> getAllFilms();
     Film getFilmByTitle(String title);
+	
 }
