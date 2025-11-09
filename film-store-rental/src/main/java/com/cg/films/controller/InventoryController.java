@@ -8,6 +8,8 @@ import com.cg.films.service.InventoryService;
  
 @RestController
 @RequestMapping("/api/inventory")
+@CrossOrigin("*")
+
 public class InventoryController {
  
     private final InventoryService inventoryService;

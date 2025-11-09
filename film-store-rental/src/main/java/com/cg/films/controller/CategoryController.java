@@ -10,6 +10,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
+@CrossOrigin("*")
+
 @Tag(name = "Category API", description = "Endpoints for managing categories")
 public class CategoryController {
 

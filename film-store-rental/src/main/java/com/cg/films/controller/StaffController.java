@@ -16,6 +16,8 @@ import com.cg.films.service.StaffService;
  
 @RestController
 @RequestMapping("/staff")
+@CrossOrigin("*")
+
 public class StaffController {
  
     @Autowired

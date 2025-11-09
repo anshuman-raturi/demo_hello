@@ -7,6 +7,8 @@ import com.cg.films.service.StoreService;
  
  
 @RestController
+@CrossOrigin("*")
+
 @RequestMapping("/store")
 public class StoreController {
  
