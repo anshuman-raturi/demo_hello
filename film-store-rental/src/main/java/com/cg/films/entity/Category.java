@@ -18,9 +18,6 @@ public class Category {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "last_update")
-    private Timestamp lastUpdate;
-
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private List<FilmCategory> filmCategories;
@@ -56,14 +53,6 @@ public class Category {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Timestamp getLastUpdate() {
-		return lastUpdate;
-	}
-
-	public void setLastUpdate(Timestamp lastUpdate) {
-		this.lastUpdate = lastUpdate;
 	}
 
 	public List<FilmCategory> getFilmCategories() {

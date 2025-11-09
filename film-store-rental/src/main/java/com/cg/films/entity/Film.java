@@ -24,10 +24,29 @@ public class Film {
     @Column(name = "release_year")
     private Integer releaseYear;
 
-    @Column(name = "last_update")
-    private Timestamp lastUpdate;
+    @Column(name = "length")
+    private Integer length;
+    
+    @Column(name = "rating")
+    private String rating;
+    
+    public Integer getLength() {
+		return length;
+	}
 
-    @OneToMany(mappedBy = "film")
+	public void setLength(Integer length) {
+		this.length = length;
+	}
+
+	public String getRating() {
+		return rating;
+	}
+
+	public void setRating(String rating) {
+		this.rating = rating;
+	}
+
+	@OneToMany(mappedBy = "film")
     @JsonIgnore
     private List<FilmActor> filmActors;
 
@@ -89,14 +108,6 @@ public class Film {
 
 	public void setReleaseYear(Integer releaseYear) {
 		this.releaseYear = releaseYear;
-	}
-
-	public Timestamp getLastUpdate() {
-		return lastUpdate;
-	}
-
-	public void setLastUpdate(Timestamp lastUpdate) {
-		this.lastUpdate = lastUpdate;
 	}
 
 	public List<FilmActor> getFilmActors() {
